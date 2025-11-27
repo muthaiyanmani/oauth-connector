@@ -35,11 +35,7 @@ const oauthConfig: ZohoOauthConfig = {
 const serviceConfig = new ZohoOAuth(oauthConfig);
 
 // Create connector WITHOUT storage strategy (in-memory cache only)
-const connector = new Connector(serviceConfig, undefined, {
-  debug: true,
-  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes
-  graceExpiryTimeInSecs: 300,
-});
+const connector = new Connector(serviceConfig);
 
 const token = await connector.getAccessToken();
 console.log(token);
@@ -51,7 +47,7 @@ console.log(token);
 import { Connector, LocalStorageStrategy, ZohoOAuth } from 'oauth-connector';
 import type { ZohoOauthConfig } from 'oauth-connector';
 
-const persistenceConfig = new LocalStorageStrategy({
+const storageConfig = new LocalStorageStrategy({
   filePath: './tokens.json',
   encryptionKey: 'your-encryption-key',
 });
@@ -64,7 +60,7 @@ const oauthConfig: ZohoOauthConfig = {
 };
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
-const connector = new Connector(serviceConfig, persistenceConfig);
+const connector = new Connector(serviceConfig, storageConfig);
 
 const token = await connector.getAccessToken();
 console.log(token);
@@ -80,7 +76,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 const s3Client = new S3Client({ region: 'us-east-1' });
 const bucketName = 'my-token-bucket';
 
-const persistenceConfig = new RemoteStorageStrategy({
+const storageConfig = new RemoteStorageStrategy({
   onUpload: async (tokenData: TokenData) => {
     await s3Client.send(new PutObjectCommand({
       Bucket: bucketName,
@@ -111,7 +107,7 @@ const oauthConfig: ZohoOauthConfig = {
 };
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
-const connector = new Connector(serviceConfig, persistenceConfig, {});
+const connector = new Connector(serviceConfig, storageConfig, {});
 ```
 
 ## API Reference
