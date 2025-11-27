@@ -35,11 +35,27 @@ export class Logger {
   }
 
   /**
+   * Get formatted timestamp
+   */
+  private getTimestamp(): string {
+    return new Date().toISOString();
+  }
+
+  /**
+   * Format log message with timestamp
+   */
+  private formatMessage(level: string, message: string): string {
+    const timestamp = this.getTimestamp();
+    const prefixPart = this.prefix ? ` [${this.prefix}]` : '';
+    return `[${timestamp}] [${level}]${prefixPart} ${message}`;
+  }
+
+  /**
    * Debug log
    */
   debug(message: string, ...args: unknown[]): void {
     if (this.level <= LogLevel.DEBUG) {
-      console.debug(`[DEBUG]${this.prefix ? ` [${this.prefix}]` : ''} ${message}`, ...args);
+      console.debug(this.formatMessage('DEBUG', message), ...args);
     }
   }
 
@@ -48,7 +64,7 @@ export class Logger {
    */
   info(message: string, ...args: unknown[]): void {
     if (this.level <= LogLevel.INFO) {
-      console.info(`[INFO]${this.prefix ? ` [${this.prefix}]` : ''} ${message}`, ...args);
+      console.info(this.formatMessage('INFO', message), ...args);
     }
   }
 
@@ -57,7 +73,7 @@ export class Logger {
    */
   warn(message: string, ...args: unknown[]): void {
     if (this.level <= LogLevel.WARN) {
-      console.warn(`[WARN]${this.prefix ? ` [${this.prefix}]` : ''} ${message}`, ...args);
+      console.warn(this.formatMessage('WARN', message), ...args);
     }
   }
 
@@ -66,12 +82,9 @@ export class Logger {
    */
   error(message: string, ...args: unknown[]): void {
     if (this.level <= LogLevel.ERROR) {
-      console.error(`[ERROR]${this.prefix ? ` [${this.prefix}]` : ''} ${message}`, ...args);
+      console.error(this.formatMessage('ERROR', message), ...args);
     }
   }
 }
 
-/**
- * Default logger instance
- */
 export const defaultLogger = new Logger();

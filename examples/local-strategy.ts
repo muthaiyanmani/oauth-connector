@@ -1,18 +1,15 @@
-import { Connector, LocalStorageStrategy, ZohoOAuth } from '../src/index';
-import type { ZohoOauthConfig } from '../src/index';
+import { Connector, LocalStorageStrategy, ZohoOAuth } from 'oauth-connector';
+import type { ZohoOauthConfig } from 'oauth-connector';
 
 /**
  * Example: Using Local File Storage Strategy with Zoho OAuth
  */
 async function example() {
-  // Configure local file persistence
   const persistenceConfig = new LocalStorageStrategy({
-    filePath: './tokens.json',
-    encryptionKey: 'your-encryption-key-here',
+    filePath: './token.json',
+    encryptionKey: '123z2DSDW',
   });
 
-  // Configure Zoho OAuth
-  // URLs are built automatically: https://accounts.zoho.com/oauth/v2/auth and https://accounts.zoho.com/oauth/v2/token
   const oauthConfig: ZohoOauthConfig = {
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret',
@@ -22,10 +19,9 @@ async function example() {
 
   const serviceConfig = new ZohoOAuth(oauthConfig);
 
-  // Create connector
   const connector = new Connector(serviceConfig, persistenceConfig, {
     debug: true,
-    backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
+    backgroundSyncIntervalInSecs: 1800
   });
 
   // Set up callbacks
@@ -45,24 +41,13 @@ async function example() {
   };
 
   try {
-    // Get access token (auto-refreshes if expired)
     const token = await connector.getAccessToken();
-    console.log('Access token:', token.substring(0, 20) + '...');
-
-    // Get token data
-    const tokenData = await connector.getTokenData();
-    console.log('Token data:', {
-      expiresAt: tokenData ? new Date(tokenData.expiresAt).toISOString() : null,
-      hasRefreshToken: !!tokenData?.refreshToken,
-    });
+    console.log('Access token:', token);
   } catch (error) {
     console.error('Error:', error);
   } finally {
-    // Cleanup
     connector.destroy();
   }
 }
 
-// Run example
 example().catch(console.error);
-

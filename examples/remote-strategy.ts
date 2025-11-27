@@ -1,5 +1,5 @@
-import { Connector, RemoteStorageStrategy, ZohoOAuth } from '../src/index';
-import type { TokenData, ZohoOauthConfig } from '../src/index';
+import { Connector, RemoteStorageStrategy, ZohoOAuth } from 'oauth-connector';
+import type { TokenData, ZohoOauthConfig } from 'oauth-connector';
 
 /**
  * Example: Using Remote Storage Strategy (S3) with Zoho OAuth
@@ -23,32 +23,22 @@ async function example() {
     },
   };
 
-  const bucketName = 'my-token-bucket';
-  const objectKey = 'tokens/zoho-tokens.json';
-
   // Configure remote persistence
   const persistenceConfig = new RemoteStorageStrategy({
     onUpload: async (tokenData: TokenData) => {
-      // Note: If encryption is enabled, tokenData may contain _encrypted and _data fields
-      // The strategy handles encryption/decryption automatically
-      // Just store the data as-is (it will be encrypted if encryptionKey is provided)
-      await s3Client.putObject(objectKey, JSON.stringify(tokenData));
+      await s3Client.putObject("token.json", JSON.stringify(tokenData));
       console.log('Token uploaded to S3');
     },
     onDownload: async (): Promise<TokenData | null> => {
-      // Download from S3
-      const data = await s3Client.getObject(objectKey);
+      const data = await s3Client.getObject("token.json");
       if (!data) {
         return null;
       }
-      // Return the data as-is (strategy will decrypt if needed)
       return JSON.parse(data) as TokenData;
     },
     encryptionKey: 'your-encryption-key-here',
   });
 
-  // Configure Zoho OAuth
-  // URLs are built automatically from accountsDomain
   const oauthConfig: ZohoOauthConfig = {
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret',
@@ -68,19 +58,11 @@ async function example() {
   try {
     // Get access token
     const token = await connector.getAccessToken();
-    console.log('Access token retrieved:', token.substring(0, 20) + '...');
+    console.log('Access token ::', token);
   } catch (error) {
     console.error('Error:', error);
   }
 
-  // Keep process alive to see background sync
-  // In production, you'd typically run this in a long-lived process
-  setTimeout(() => {
-    connector.destroy();
-    process.exit(0);
-  }, 60000); // Run for 1 minute
 }
 
-// Run example
 example().catch(console.error);
-

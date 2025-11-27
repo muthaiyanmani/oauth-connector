@@ -7,7 +7,6 @@ A Node.js SDK for OAuth token management with multiple persistence strategies, e
 
 ## Features
 
-- 🚀 **In-Memory Caching**: Built-in in-memory cache for fast token access (no storage required)
 - 🔐 **Optional Persistence**: Local file or remote storage (S3, etc.) - storage strategy is optional
 - 🔒 **Encryption Support**: AES-256-GCM encryption for token storage
 - 🔄 **Automatic Token Refresh**: Automatic token refresh when expired or within grace period
@@ -22,18 +21,15 @@ npm install oauth-connector
 
 ## Quick Start
 
-### In-Memory Only (No Storage)
-
 ```typescript
 import { Connector, ZohoOAuth } from 'oauth-connector';
 import type { ZohoOauthConfig } from 'oauth-connector';
 
-// Zoho OAuth config
 const oauthConfig: ZohoOauthConfig = {
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret',
   accountsDomain: 'accounts.zoho.com',
-  refreshToken: 'initial-refresh-token' // Required when no storage strategy
+  refreshToken: 'initial-refresh-token'
 };
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
@@ -41,12 +37,12 @@ const serviceConfig = new ZohoOAuth(oauthConfig);
 // Create connector WITHOUT storage strategy (in-memory cache only)
 const connector = new Connector(serviceConfig, undefined, {
   debug: true,
-  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
+  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes
   graceExpiryTimeInSecs: 300,
 });
 
-// Get access token (cached in memory after first call)
 const token = await connector.getAccessToken();
+console.log(token);
 ```
 
 ### Local File Strategy with Zoho
@@ -60,7 +56,6 @@ const persistenceConfig = new LocalStorageStrategy({
   encryptionKey: 'your-encryption-key',
 });
 
-// Zoho OAuth config - URLs are built automatically from accountsDomain
 const oauthConfig: ZohoOauthConfig = {
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret',
@@ -69,17 +64,13 @@ const oauthConfig: ZohoOauthConfig = {
 };
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
-const connector = new Connector(serviceConfig, persistenceConfig, {
-  debug: true,
-  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
-  graceExpiryTimeInSecs: 300, // Refresh token 5 minutes (300 seconds) before it expires
-});
+const connector = new Connector(serviceConfig, persistenceConfig);
 
-// Get access token (auto-refreshes if expired or within grace period)
 const token = await connector.getAccessToken();
+console.log(token);
 ```
 
-### Remote Strategy (S3)
+### Remote Strategy
 
 ```typescript
 import { Connector, RemoteStorageStrategy, ZohoOAuth } from 'oauth-connector';
@@ -98,17 +89,20 @@ const persistenceConfig = new RemoteStorageStrategy({
     }));
   },
   onDownload: async (): Promise<TokenData | null> => {
-    const response = await s3Client.send(new GetObjectCommand({
-      Bucket: bucketName,
-      Key: 'tokens.json',
-    }));
-    const data = await response.Body.transformToString();
-    return JSON.parse(data);
+   try{
+      const response = await s3Client.send(new GetObjectCommand({
+        Bucket: bucketName,
+        Key: 'tokens.json',
+      }));
+      const data = await response.Body.transformToString();
+      return JSON.parse(data);
+   } catch{
+      return null;
+   }
   },
   encryptionKey: 'your-encryption-key',
 });
 
-// Zoho OAuth config
 const oauthConfig: ZohoOauthConfig = {
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret',
@@ -117,36 +111,7 @@ const oauthConfig: ZohoOauthConfig = {
 };
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
-const connector = new Connector(serviceConfig, persistenceConfig, {
-  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
-});
-```
-
-### In-Memory Only (Multiple Instances)
-
-```typescript
-import { Connector, OAuth } from 'oauth-connector';
-import type { ConnectorConfig } from 'oauth-connector';
-
-// Generic OAuth config (for Google or other providers)
-const oauthConfig: ConnectorConfig = {
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  authUrl: 'https://oauth.example.com/authorize',
-  refreshUrl: 'https://oauth.example.com/token',
-  refreshToken: 'initial-refresh-token' // Required when no storage strategy
-};
-
-const serviceConfig = new OAuth(oauthConfig);
-
-// Each connector instance has its own in-memory cache
-const connector1 = new Connector(serviceConfig, undefined, {
-  instanceId: 'connector-1',
-});
-
-const connector2 = new Connector(serviceConfig, undefined, {
-  instanceId: 'connector-2',
-});
+const connector = new Connector(serviceConfig, persistenceConfig, {});
 ```
 
 ## API Reference
@@ -160,7 +125,7 @@ Main class that orchestrates OAuth service and persistence strategy.
 ```typescript
 new Connector(
   oauthService: OAuthService,
-  storageStrategy?: StorageStrategy, // Optional - if not provided, uses in-memory cache only
+  storageStrategy?: StorageStrategy, // Optional
   options?: ConnectorOptions
 )
 ```
@@ -180,9 +145,6 @@ interface ConnectorOptions {
 
 - `getAccessToken(): Promise<string>` - Get access token (auto-refreshes if expired). Uses in-memory cache for fast access.
 - `refreshToken(): Promise<TokenData>` - Manually refresh token
-- `getTokenData(): Promise<TokenData | null>` - Get current token data (from cache)
-- `exchangeCodeForTokens(code: string, redirectUri: string): Promise<TokenData>` - Exchange authorization code for tokens
-- `deleteToken(): Promise<void>` - Delete stored token (clears cache and storage)
 - `destroy(): void` - Cleanup resources (stops background sync and clears cache)
 
 #### Callbacks
@@ -201,86 +163,7 @@ connector.onTokenError = (error: Error) => {
 };
 ```
 
-### Storage Strategies
-
-#### LocalStorageStrategy
-
-Persists tokens to a local file.
-
-```typescript
-new LocalStorageStrategy({
-  filePath: './tokens.json',
-  encryptionKey?: string,
-})
-```
-
-#### RemoteStorageStrategy
-
-Persists tokens using custom upload/download callbacks.
-
-```typescript
-new RemoteStorageStrategy({
-  onUpload: (tokenData: TokenData) => Promise<void>,
-  onDownload: () => Promise<TokenData | null>,
-  encryptionKey?: string,
-})
-```
-
 **Note:** If no storage strategy is provided, the connector uses in-memory caching only. Tokens are cached for performance but not persisted across restarts.
-
-### OAuth Services
-
-#### ZohoOAuth
-
-Zoho-specific OAuth implementation. URLs are built automatically from `accountsDomain`.
-
-```typescript
-new ZohoOAuth({
-  clientId: string,
-  clientSecret: string,
-  accountsDomain: string, // e.g., "accounts.zoho.com", "accounts.zoho.eu", "accounts.zoho.in"
-  refreshToken?: string,
-})
-```
-
-#### GoogleOAuth
-
-Google-specific OAuth implementation.
-
-```typescript
-new GoogleOAuth({
-  clientId: string,
-  clientSecret: string,
-  authUrl: string,
-  refreshUrl: string,
-  refreshToken?: string,
-})
-```
-
-#### OAuth
-
-Generic OAuth implementation.
-
-```typescript
-new OAuth({
-  clientId: string,
-  clientSecret: string,
-  authUrl: string,
-  refreshUrl: string,
-  refreshToken?: string,
-})
-```
-
-
-## Examples
-
-See the `examples/` directory for complete examples:
-
-- `zoho-simple.ts` - Simple Zoho OAuth usage (basic example)
-- `zoho-advanced.ts` - Advanced Zoho OAuth usage (with callbacks, background sync, etc.)
-- `local-strategy.ts` - Local file persistence
-- `remote-strategy.ts` - Remote storage (S3)
-- `global-strategy.ts` - Multiple instances without storage (each with own cache)
 
 ## Contributing
 
