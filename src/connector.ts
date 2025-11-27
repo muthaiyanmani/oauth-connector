@@ -42,19 +42,19 @@ export class Connector {
     }
 
     // Create token manager
-    const backgroundSyncInterval = options.backgroundSyncInterval;
+    const backgroundSyncIntervalInSecs = options.backgroundSyncIntervalInSecs;
     const graceExpiryTimeInSecs = options.graceExpiryTimeInSecs;
 
     this.tokenManager = new TokenManager(
       this.oauthService,
       this.storageStrategy,
-      backgroundSyncInterval,
+      backgroundSyncIntervalInSecs,
       graceExpiryTimeInSecs,
       this.logger
     );
 
     // Start background sync if interval is provided
-    if (backgroundSyncInterval) {
+    if (backgroundSyncIntervalInSecs) {
       this.tokenManager.startBackgroundSync();
     }
 

@@ -59,7 +59,7 @@ export interface LocalStorageConfig {
  */
 export interface ConnectorOptions {
   instanceId?: string;
-  backgroundSyncInterval?: number; // minutes - if provided, background sync is enabled automatically
+  backgroundSyncIntervalInSecs?: number; // seconds - if provided, background sync is enabled automatically
   graceExpiryTimeInSecs?: number; // seconds - refresh token when expiresAt - graceExpiryTimeInSecs is reached
   debug?: boolean;
 }

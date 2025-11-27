@@ -25,7 +25,7 @@ async function example() {
   // Create connector
   const connector = new Connector(serviceConfig, persistenceConfig, {
     debug: true,
-    backgroundSyncInterval: 30, // Check every 30 minutes
+    backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
   });
 
   // Set up callbacks

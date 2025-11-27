@@ -26,7 +26,7 @@ async function zohoExample() {
   // Step 3: Create connector
   const connector = new Connector(serviceConfig, persistenceConfig, {
     instanceId: 'zoho-main',
-    backgroundSyncInterval: 30, // Check every 30 minutes
+    backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
     debug: process.env.NODE_ENV === 'development',
   });
 

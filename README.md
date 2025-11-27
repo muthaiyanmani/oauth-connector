@@ -41,7 +41,7 @@ const serviceConfig = new ZohoOAuth(oauthConfig);
 // Create connector WITHOUT storage strategy (in-memory cache only)
 const connector = new Connector(serviceConfig, undefined, {
   debug: true,
-  backgroundSyncInterval: 30,
+  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
   graceExpiryTimeInSecs: 300,
 });
 
@@ -71,7 +71,7 @@ const oauthConfig: ZohoOauthConfig = {
 const serviceConfig = new ZohoOAuth(oauthConfig);
 const connector = new Connector(serviceConfig, persistenceConfig, {
   debug: true,
-  backgroundSyncInterval: 30, // Check every 30 minutes
+  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
   graceExpiryTimeInSecs: 300, // Refresh token 5 minutes (300 seconds) before it expires
 });
 
@@ -118,7 +118,7 @@ const oauthConfig: ZohoOauthConfig = {
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
 const connector = new Connector(serviceConfig, persistenceConfig, {
-  backgroundSyncInterval: 30, // Check every 30 minutes
+  backgroundSyncIntervalInSecs: 1800, // Check every 30 minutes (1800 seconds)
 });
 ```
 
@@ -170,7 +170,7 @@ new Connector(
 ```typescript
 interface ConnectorOptions {
   instanceId?: string;              // Unique ID for multi-instance support
-  backgroundSyncInterval?: number;  // Minutes between background syncs (if provided, sync is enabled)
+  backgroundSyncIntervalInSecs?: number;  // Seconds between background syncs (if provided, sync is enabled)
   graceExpiryTimeInSecs?: number;   // Seconds - refresh token when expiresAt - graceExpiryTimeInSecs is reached (default: 0)
   debug?: boolean;                  // Enable debug logging
 }

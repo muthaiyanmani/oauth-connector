@@ -11,20 +11,20 @@ export class TokenManager {
   private storageStrategy?: StorageStrategy;
   private logger: Logger;
   private backgroundSyncInterval?: NodeJS.Timeout;
-  private backgroundSyncIntervalMinutes?: number;
+  private backgroundSyncIntervalSecs?: number;
   private graceExpiryTimeSecs: number; // seconds before expiry to refresh
   private cachedTokenData: TokenData | null = null; // In-memory cache
 
   constructor(
     oauthService: OAuthService,
     storageStrategy?: StorageStrategy, // Make optional
-    backgroundSyncInterval?: number, // minutes - if provided, sync is enabled
+    backgroundSyncIntervalInSecs?: number, // seconds - if provided, sync is enabled
     graceExpiryTimeInSecs?: number, // seconds - default 0 (refresh only when expired)
     logger?: Logger
   ) {
     this.oauthService = oauthService;
     this.storageStrategy = storageStrategy;
-    this.backgroundSyncIntervalMinutes = backgroundSyncInterval;
+    this.backgroundSyncIntervalSecs = backgroundSyncIntervalInSecs;
     this.graceExpiryTimeSecs = graceExpiryTimeInSecs || 0; // Default to 0 if not provided
     this.logger = logger || new Logger(LogLevel.INFO);
   }
@@ -142,14 +142,14 @@ export class TokenManager {
       return;
     }
 
-    if (!this.backgroundSyncIntervalMinutes) {
+    if (!this.backgroundSyncIntervalSecs) {
       this.logger.debug('Background sync is not configured');
       return;
     }
 
-    this.logger.debug(`Starting background sync (interval: ${this.backgroundSyncIntervalMinutes} minutes)`);
+    this.logger.debug(`Starting background sync (interval: ${this.backgroundSyncIntervalSecs} seconds)`);
     
-    const intervalMs = this.backgroundSyncIntervalMinutes * 60 * 1000;
+    const intervalMs = this.backgroundSyncIntervalSecs * 1000;
     this.backgroundSyncInterval = setInterval(async () => {
       try {
         this.logger.debug('Background sync: checking token...');
