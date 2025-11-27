@@ -1,0 +1,15 @@
+src/
+examples/
+tests/
+*.ts
+!*.d.ts
+tsconfig*.json
+.eslintrc.js
+.prettierrc
+.gitignore
+node_modules/
+*.log
+.DS_Store
+.env
+*.tsbuildinfo
+
