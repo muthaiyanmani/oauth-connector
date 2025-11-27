@@ -1,6 +1,9 @@
 # OAuth Connector SDK
 
-A robust Node.js SDK for OAuth token management with multiple persistence strategies, encryption support, and background token synchronization.
+A Node.js SDK for OAuth token management with multiple persistence strategies, encryption support, and background token synchronization.
+
+[![GitHub](https://img.shields.io/github/license/muthaiyanmani/oauth-connector)](https://github.com/muthaiyanmani/oauth-connector/blob/main/LICENSE)
+[![npm](https://img.shields.io/npm/v/oauth-connector)](https://www.npmjs.com/package/oauth-connector)
 
 ## Features
 
@@ -9,10 +12,6 @@ A robust Node.js SDK for OAuth token management with multiple persistence strate
 - 🔄 **Automatic Token Refresh**: Smart token refresh before expiry
 - ⚙️ **Multiple OAuth Providers**: Zoho, Google, and generic OAuth support
 - 🔁 **Background Sync**: Automatic token refresh in the background
-- 📦 **Multiple Instances**: Support for multiple connector instances
-- 🐛 **Debug Logging**: Configurable logging with levels
-- 📝 **TypeScript**: Full TypeScript support with type definitions
-- 📦 **Dual Module Support**: CommonJS and ESM exports
 
 ## Installation
 
@@ -38,7 +37,7 @@ const oauthConfig: ZohoOauthConfig = {
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret',
   accountsDomain: 'accounts.zoho.com', // or 'accounts.zoho.eu', 'accounts.zoho.in', etc.
-  refreshToken: 'initial-refresh-token', // Optional
+  refreshToken: 'initial-refresh-token'
 };
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
@@ -111,8 +110,7 @@ const oauthConfig: ConnectorConfig = {
   clientSecret: 'your-client-secret',
   authUrl: 'https://oauth.example.com/authorize',
   refreshUrl: 'https://oauth.example.com/token',
-  refreshToken: 'initial-refresh-token',
-  refreshIn: 30,
+  refreshToken: 'initial-refresh-token'
 };
 
 const serviceConfig = new OAuth(oauthConfig);
@@ -149,14 +147,6 @@ interface ConnectorOptions {
 #### Methods
 
 - `getAccessToken(): Promise<string>` - Get access token (auto-refreshes if expired)
-- `refreshToken(): Promise<TokenData>` - Manually refresh token
-- `getTokenData(): Promise<TokenData | null>` - Get current token data
-- `getAuthorizationUrl(redirectUri: string, scopes?: string[]): string` - Get OAuth authorization URL
-- `exchangeCodeForTokens(code: string, redirectUri: string): Promise<TokenData>` - Exchange authorization code for tokens
-- `deleteToken(): Promise<void>` - Delete stored token
-- `startBackgroundSync(): void` - Start background token sync
-- `stopBackgroundSync(): void` - Stop background token sync
-- `destroy(): void` - Cleanup resources
 
 #### Callbacks
 
@@ -224,10 +214,6 @@ new ZohoOAuth({
 })
 ```
 
-**Note**: The `accountsDomain` is used to automatically build:
-- Authorization URL: `https://${accountsDomain}/oauth/v2/auth`
-- Token URL: `https://${accountsDomain}/oauth/v2/token`
-
 #### GoogleOAuth
 
 Google-specific OAuth implementation.
@@ -258,51 +244,6 @@ new OAuth({
 })
 ```
 
-## Configuration
-
-### ZohoOauthConfig
-
-Zoho-specific OAuth configuration.
-
-```typescript
-interface ZohoOauthConfig {
-  clientId: string;        // OAuth Client ID
-  clientSecret: string;     // OAuth Client Secret
-  accountsDomain: string;   // e.g., "accounts.zoho.com", "accounts.zoho.eu", "accounts.zoho.in"
-  refreshToken?: string;    // Initial refresh token (optional)
-}
-```
-
-**Note**: URLs are built automatically from `accountsDomain`:
-- Authorization URL: `https://${accountsDomain}/oauth/v2/auth`
-- Token URL: `https://${accountsDomain}/oauth/v2/token`
-
-### ConnectorConfig
-
-Generic OAuth configuration (for Google and other providers).
-
-```typescript
-interface ConnectorConfig {
-  clientId: string;        // OAuth Client ID
-  clientSecret: string;    // OAuth Client Secret
-  authUrl: string;         // OAuth authorization URL
-  refreshUrl: string;       // Token refresh URL
-  refreshToken?: string;   // Initial refresh token (optional)
-  refreshIn?: number;      // Minutes before expiry to refresh (default: 30)
-}
-```
-
-### TokenData
-
-```typescript
-interface TokenData {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt: number;       // Timestamp in milliseconds
-  tokenType?: string;
-  scope?: string;
-}
-```
 
 ## Examples
 
@@ -312,6 +253,16 @@ See the `examples/` directory for complete examples:
 - `remote-strategy.ts` - Remote storage (S3)
 - `global-strategy.ts` - In-memory persistence
 - `zoho-example.ts` - Complete Zoho OAuth flow
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Repository Links
+
+- **GitHub**: [https://github.com/muthaiyanmani/oauth-connector](https://github.com/muthaiyanmani/oauth-connector)
+- **Issues**: [https://github.com/muthaiyanmani/oauth-connector/issues](https://github.com/muthaiyanmani/oauth-connector/issues)
+- **npm**: [https://www.npmjs.com/package/oauth-connector](https://www.npmjs.com/package/oauth-connector)
 
 ## Development
 
@@ -340,5 +291,5 @@ npm run format
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
