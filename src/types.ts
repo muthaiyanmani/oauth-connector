@@ -55,13 +55,6 @@ export interface LocalStorageConfig {
 }
 
 /**
- * Global storage strategy configuration
- */
-export interface GlobalStorageConfig {
-  encryptionKey?: string;
-}
-
-/**
  * Connector options
  */
 export interface ConnectorOptions {

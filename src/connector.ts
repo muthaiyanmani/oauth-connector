@@ -15,7 +15,7 @@ import { Logger, LogLevel } from './utils/logger';
  */
 export class Connector {
   private oauthService: OAuthService;
-  private storageStrategy: StorageStrategy;
+  private storageStrategy?: StorageStrategy;
   private tokenManager: TokenManager;
   private logger: Logger;
 
@@ -26,7 +26,7 @@ export class Connector {
 
   constructor(
     oauthService: OAuthService,
-    storageStrategy: StorageStrategy,
+    storageStrategy?: StorageStrategy, // Make optional
     options: ConnectorOptions = {}
   ) {
     this.oauthService = oauthService;
@@ -36,8 +36,8 @@ export class Connector {
     const logLevel = options.debug ? LogLevel.DEBUG : LogLevel.INFO;
     this.logger = new Logger(logLevel, options.instanceId);
 
-    // Set instance ID for global strategy if applicable
-    if (options.instanceId && 'setInstanceId' in storageStrategy) {
+    // Set instance ID for storage strategy if applicable (only if storageStrategy exists)
+    if (options.instanceId && storageStrategy && 'setInstanceId' in storageStrategy) {
       (storageStrategy as any).setInstanceId(options.instanceId);
     }
 
@@ -148,7 +148,15 @@ export class Connector {
     try {
       this.logger.debug('Exchanging authorization code for tokens');
       const tokenData = await this.oauthService.exchangeCodeForTokens(code, redirectUri);
-      await this.storageStrategy.saveToken(tokenData);
+      
+      // Save to storage (if available)
+      if (this.storageStrategy) {
+        await this.storageStrategy.saveToken(tokenData);
+      }
+      
+      // Update cache
+      this.tokenManager.setCachedToken(tokenData);
+      
       this.logger.debug('Tokens obtained and saved');
       return tokenData;
     } catch (error) {
@@ -162,7 +170,10 @@ export class Connector {
    */
   async deleteToken(): Promise<void> {
     try {
-      await this.storageStrategy.deleteToken();
+      if (this.storageStrategy) {
+        await this.storageStrategy.deleteToken();
+      }
+      this.tokenManager.clearCache();
       this.logger.debug('Token deleted');
     } catch (error) {
       this.logger.error(`Failed to delete token: ${error instanceof Error ? error.message : 'Unknown error'}`);

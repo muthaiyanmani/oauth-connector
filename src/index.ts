@@ -5,7 +5,6 @@ export { Connector } from './connector';
 export { StorageStrategy } from './strategies/storage-strategy';
 export { LocalStorageStrategy } from './strategies/local-storage-strategy';
 export { RemoteStorageStrategy } from './strategies/remote-storage-strategy';
-export { GlobalStorageStrategy } from './strategies/global-storage-strategy';
 
 // OAuth Services
 export { OAuthService } from './services/oauth-service';
@@ -21,7 +20,6 @@ export type {
   TokenData,
   RemoteStorageConfig,
   LocalStorageConfig,
-  GlobalStorageConfig,
   ConnectorOptions,
   OAuthTokenResponse,
   OnFetchingAccessTokenCallback,
