@@ -92,7 +92,9 @@ export class TokenManager {
     } catch (error) {
       // Clear cache on error
       this.cachedTokenData = null;
-      this.logger.error(`Failed to get access token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to get access token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -117,18 +119,20 @@ export class TokenManager {
 
       this.logger.debug('Manually refreshing token...');
       const newTokenData = await this.oauthService.refreshAccessToken(refreshToken);
-      
+
       // Update storage (if available) and cache
       if (this.storageStrategy) {
         await this.storageStrategy.saveToken(newTokenData);
       }
       this.cachedTokenData = newTokenData;
-      
+
       this.logger.debug('Token manually refreshed and saved');
       return newTokenData;
     } catch (error) {
       this.cachedTokenData = null;
-      this.logger.error(`Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -147,13 +151,15 @@ export class TokenManager {
       return;
     }
 
-    this.logger.debug(`Starting background sync (interval: ${this.backgroundSyncIntervalSecs} seconds)`);
-    
+    this.logger.debug(
+      `Starting background sync (interval: ${this.backgroundSyncIntervalSecs} seconds)`
+    );
+
     const intervalMs = this.backgroundSyncIntervalSecs * 1000;
     this.backgroundSyncInterval = setInterval(async () => {
       try {
         this.logger.debug('Background sync: checking token...');
-        
+
         // Check cache first, fallback to storage
         let tokenData: TokenData | null = this.cachedTokenData;
         if (!tokenData && this.storageStrategy) {
@@ -162,9 +168,9 @@ export class TokenManager {
 
         if (tokenData && this.isTokenExpired(tokenData)) {
           this.logger.debug('Background sync: token expired, refreshing...');
-          
+
           const refreshToken = tokenData.refreshToken || this.oauthService.getRefreshToken();
-          
+
           if (refreshToken) {
             const newTokenData = await this.oauthService.refreshAccessToken(refreshToken);
             if (this.storageStrategy) {
@@ -180,7 +186,9 @@ export class TokenManager {
         }
       } catch (error) {
         this.cachedTokenData = null;
-        this.logger.error(`Background sync error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        this.logger.error(
+          `Background sync error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }, intervalMs);
   }
@@ -204,7 +212,7 @@ export class TokenManager {
     if (this.cachedTokenData) {
       return this.cachedTokenData;
     }
-    
+
     // Otherwise load from storage (if available)
     if (this.storageStrategy) {
       const tokenData = await this.storageStrategy.loadToken();
@@ -213,7 +221,7 @@ export class TokenManager {
       }
       return tokenData;
     }
-    
+
     return null;
   }
 
@@ -241,4 +249,3 @@ export class TokenManager {
     this.clearCache();
   }
 }
-

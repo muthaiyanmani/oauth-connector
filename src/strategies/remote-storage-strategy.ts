@@ -21,7 +21,7 @@ export class RemoteStorageStrategy extends StorageStrategy {
   async saveToken(tokenData: TokenData): Promise<void> {
     try {
       this.logger.debug('Saving token to remote storage');
-      
+
       // Encrypt token data if encryption key is provided
       // We encrypt the entire TokenData as JSON, then wrap it in a special format
       let dataToUpload = tokenData;
@@ -39,7 +39,9 @@ export class RemoteStorageStrategy extends StorageStrategy {
       await this.onUpload(dataToUpload);
       this.logger.debug('Token saved to remote storage successfully');
     } catch (error) {
-      this.logger.error(`Failed to save token to remote storage: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to save token to remote storage: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -51,7 +53,7 @@ export class RemoteStorageStrategy extends StorageStrategy {
     try {
       this.logger.debug('Loading token from remote storage');
       const tokenData = await this.onDownload();
-      
+
       if (!tokenData) {
         this.logger.debug('No token found in remote storage');
         return null;
@@ -66,7 +68,9 @@ export class RemoteStorageStrategy extends StorageStrategy {
           this.logger.debug('Token decrypted and loaded from remote storage successfully');
           return parsed;
         } catch (error) {
-          this.logger.error(`Failed to decrypt token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          this.logger.error(
+            `Failed to decrypt token: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
           throw error;
         }
       }
@@ -75,7 +79,9 @@ export class RemoteStorageStrategy extends StorageStrategy {
       this.logger.debug('Token loaded from remote storage successfully');
       return tokenData;
     } catch (error) {
-      this.logger.error(`Failed to load token from remote storage: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to load token from remote storage: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -91,9 +97,10 @@ export class RemoteStorageStrategy extends StorageStrategy {
       await this.onUpload(null as unknown as TokenData);
       this.logger.debug('Token deleted from remote storage successfully');
     } catch (error) {
-      this.logger.error(`Failed to delete token from remote storage: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to delete token from remote storage: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
 }
-

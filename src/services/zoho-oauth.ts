@@ -31,7 +31,7 @@ export class ZohoOAuth extends OAuthService {
    */
   async refreshAccessToken(refreshToken: string): Promise<TokenData> {
     this.logger.debug('Refreshing Zoho access token');
-    
+
     const params = {
       refresh_token: refreshToken,
       client_id: this.zohoConfig.clientId,
@@ -72,7 +72,7 @@ export class ZohoOAuth extends OAuthService {
    */
   async exchangeCodeForTokens(code: string, redirectUri: string): Promise<TokenData> {
     this.logger.debug('Exchanging Zoho authorization code for tokens');
-    
+
     const params = {
       grant_type: 'authorization_code',
       client_id: this.zohoConfig.clientId,
@@ -88,4 +88,3 @@ export class ZohoOAuth extends OAuthService {
     return tokenData;
   }
 }
-

@@ -15,7 +15,7 @@ export class OAuth extends OAuthService {
    */
   async refreshAccessToken(refreshToken: string): Promise<TokenData> {
     this.logger.debug('Refreshing access token (generic OAuth)');
-    
+
     const params = {
       refresh_token: refreshToken,
       client_id: this.config.clientId,
@@ -59,7 +59,7 @@ export class OAuth extends OAuthService {
    */
   async exchangeCodeForTokens(code: string, redirectUri: string): Promise<TokenData> {
     this.logger.debug('Exchanging authorization code for tokens (generic OAuth)');
-    
+
     const params = {
       grant_type: 'authorization_code',
       client_id: this.config.clientId,
@@ -75,4 +75,3 @@ export class OAuth extends OAuthService {
     return tokenData;
   }
 }
-

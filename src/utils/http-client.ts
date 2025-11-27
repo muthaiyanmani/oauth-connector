@@ -72,10 +72,10 @@ export class HttpClient {
 
         this.logger.debug(`Making ${requestOptions.method} request to: ${url}`);
 
-        const req = requestModule(requestOptions, (res) => {
+        const req = requestModule(requestOptions, res => {
           let data = '';
 
-          res.on('data', (chunk) => {
+          res.on('data', chunk => {
             data += chunk;
           });
 
@@ -108,7 +108,7 @@ export class HttpClient {
           });
         });
 
-        req.on('error', (error) => {
+        req.on('error', error => {
           this.logger.error(`Request error: ${error.message}`);
           reject(error);
         });
@@ -199,4 +199,3 @@ export class HttpClient {
  * Default HTTP client instance
  */
 export const defaultHttpClient = new HttpClient();
-

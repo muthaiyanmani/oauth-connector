@@ -81,4 +81,3 @@ export interface OAuthTokenResponse {
 export type OnFetchingAccessTokenCallback = () => void | Promise<void>;
 export type OnTokenRefreshedCallback = (token: TokenData) => void | Promise<void>;
 export type OnTokenErrorCallback = (error: Error) => void | Promise<void>;
-

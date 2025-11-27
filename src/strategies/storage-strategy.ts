@@ -51,4 +51,3 @@ export abstract class StorageStrategy {
     return data;
   }
 }
-

@@ -15,7 +15,7 @@ export class GoogleOAuth extends OAuthService {
    */
   async refreshAccessToken(refreshToken: string): Promise<TokenData> {
     this.logger.debug('Refreshing Google access token');
-    
+
     const params = {
       refresh_token: refreshToken,
       client_id: this.config.clientId,
@@ -38,7 +38,10 @@ export class GoogleOAuth extends OAuthService {
   /**
    * Get Google authorization URL
    */
-  getAuthorizationUrl(redirectUri: string, scopes: string[] = ['openid', 'email', 'profile']): string {
+  getAuthorizationUrl(
+    redirectUri: string,
+    scopes: string[] = ['openid', 'email', 'profile']
+  ): string {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.config.clientId,
@@ -56,7 +59,7 @@ export class GoogleOAuth extends OAuthService {
    */
   async exchangeCodeForTokens(code: string, redirectUri: string): Promise<TokenData> {
     this.logger.debug('Exchanging Google authorization code for tokens');
-    
+
     const params = {
       grant_type: 'authorization_code',
       client_id: this.config.clientId,
@@ -72,4 +75,3 @@ export class GoogleOAuth extends OAuthService {
     return tokenData;
   }
 }
-

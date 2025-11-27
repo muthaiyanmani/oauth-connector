@@ -47,24 +47,22 @@ export abstract class OAuthService {
   ): Promise<OAuthTokenResponse> {
     try {
       this.logger.debug(`Making token request to: ${url}`);
-      
+
       const formData = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         formData.append(key, value);
       });
 
-      const response = await this.httpClient.post<OAuthTokenResponse>(
-        url,
-        formData.toString(),
-        {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        }
-      );
+      const response = await this.httpClient.post<OAuthTokenResponse>(url, formData.toString(), {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      });
 
       this.logger.debug('Token request successful');
       return response.data;
     } catch (error) {
-      this.logger.error(`Token request error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Token request error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -85,4 +83,3 @@ export abstract class OAuthService {
     };
   }
 }
-

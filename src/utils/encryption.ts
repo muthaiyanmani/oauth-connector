@@ -50,16 +50,15 @@ export class EncryptionService {
       const tag = cipher.getAuthTag();
 
       // Combine salt + iv + tag + encrypted data
-      const result = Buffer.concat([
-        salt,
-        iv,
-        tag,
-        Buffer.from(encrypted, 'hex'),
-      ]).toString('base64');
+      const result = Buffer.concat([salt, iv, tag, Buffer.from(encrypted, 'hex')]).toString(
+        'base64'
+      );
 
       return result;
     } catch (error) {
-      throw new Error(`Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -93,7 +92,9 @@ export class EncryptionService {
 
       return decrypted;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }
@@ -102,4 +103,3 @@ export class EncryptionService {
  * Default encryption service instance
  */
 export const defaultEncryptionService = new EncryptionService();
-

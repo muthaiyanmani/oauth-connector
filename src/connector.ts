@@ -89,7 +89,7 @@ export class Connector {
       return token;
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Unknown error');
-      
+
       if (this.onTokenError) {
         await this.onTokenError(err);
       }
@@ -117,7 +117,7 @@ export class Connector {
       return tokenData;
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Unknown error');
-      
+
       if (this.onTokenError) {
         await this.onTokenError(err);
       }
@@ -148,19 +148,21 @@ export class Connector {
     try {
       this.logger.debug('Exchanging authorization code for tokens');
       const tokenData = await this.oauthService.exchangeCodeForTokens(code, redirectUri);
-      
+
       // Save to storage (if available)
       if (this.storageStrategy) {
         await this.storageStrategy.saveToken(tokenData);
       }
-      
+
       // Update cache
       this.tokenManager.setCachedToken(tokenData);
-      
+
       this.logger.debug('Tokens obtained and saved');
       return tokenData;
     } catch (error) {
-      this.logger.error(`Failed to exchange code for tokens: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to exchange code for tokens: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -176,7 +178,9 @@ export class Connector {
       this.tokenManager.clearCache();
       this.logger.debug('Token deleted');
     } catch (error) {
-      this.logger.error(`Failed to delete token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to delete token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -203,4 +207,3 @@ export class Connector {
     this.logger.debug('Connector destroyed');
   }
 }
-

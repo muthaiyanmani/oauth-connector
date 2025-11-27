@@ -32,7 +32,9 @@ export class LocalStorageStrategy extends StorageStrategy {
       await fs.writeFile(this.filePath, encrypted, 'utf8');
       this.logger.debug('Token saved successfully');
     } catch (error) {
-      this.logger.error(`Failed to save token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to save token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -53,7 +55,9 @@ export class LocalStorageStrategy extends StorageStrategy {
         this.logger.debug('Token file does not exist');
         return null;
       }
-      this.logger.error(`Failed to load token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to load token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
@@ -71,9 +75,10 @@ export class LocalStorageStrategy extends StorageStrategy {
         this.logger.debug('Token file does not exist, nothing to delete');
         return;
       }
-      this.logger.error(`Failed to delete token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Failed to delete token: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       throw error;
     }
   }
 }
-
