@@ -276,11 +276,11 @@ new OAuth({
 
 See the `examples/` directory for complete examples:
 
-- `in-memory-only.ts` - Using connector without storage strategy (in-memory cache only)
+- `zoho-simple.ts` - Simple Zoho OAuth usage (basic example)
+- `zoho-advanced.ts` - Advanced Zoho OAuth usage (with callbacks, background sync, etc.)
 - `local-strategy.ts` - Local file persistence
 - `remote-strategy.ts` - Remote storage (S3)
 - `global-strategy.ts` - Multiple instances without storage (each with own cache)
-- `zoho-example.ts` - Complete Zoho OAuth flow
 
 ## Contributing
 
