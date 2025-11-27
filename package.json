@@ -2,14 +2,14 @@
   "name": "oauth-connector",
   "version": "0.0.2",
   "description": "OAuth Connector SDK for automatic token management and refresh with multiple persistence strategies",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/esm/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/esm/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     }
   },
   "files": [
@@ -18,11 +18,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "npm run build:clean && npm run build:cjs && npm run build:esm",
-    "build:clean": "rm -rf dist",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -53,11 +50,10 @@
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
     "prettier": "^3.1.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.3.3"
   },
-  "dependencies": {},
   "engines": {
     "node": ">=18.0.0"
   }
 }
-
