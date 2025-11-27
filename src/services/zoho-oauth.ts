@@ -19,7 +19,6 @@ export class ZohoOAuth extends OAuthService {
       authUrl: `${baseUrl}/oauth/v2/auth`,
       refreshUrl: `${baseUrl}/oauth/v2/token`,
       refreshToken: config.refreshToken,
-      // refreshIn uses default (30) from ConnectorOptions or TokenManager
     };
     super(connectorConfig, logger);
     this.zohoConfig = config;

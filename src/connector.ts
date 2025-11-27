@@ -1,5 +1,5 @@
 import { OAuthService } from './services/oauth-service';
-import { AuthStrategy } from './strategies/auth-strategy';
+import { StorageStrategy } from './strategies/storage-strategy';
 import { TokenManager } from './token-manager';
 import {
   ConnectorOptions,
@@ -15,7 +15,7 @@ import { Logger, LogLevel } from './utils/logger';
  */
 export class Connector {
   private oauthService: OAuthService;
-  private authStrategy: AuthStrategy;
+  private storageStrategy: StorageStrategy;
   private tokenManager: TokenManager;
   private logger: Logger;
 
@@ -26,37 +26,35 @@ export class Connector {
 
   constructor(
     oauthService: OAuthService,
-    authStrategy: AuthStrategy,
+    storageStrategy: StorageStrategy,
     options: ConnectorOptions = {}
   ) {
     this.oauthService = oauthService;
-    this.authStrategy = authStrategy;
+    this.storageStrategy = storageStrategy;
 
     // Setup logger
     const logLevel = options.debug ? LogLevel.DEBUG : LogLevel.INFO;
     this.logger = new Logger(logLevel, options.instanceId);
 
     // Set instance ID for global strategy if applicable
-    if (options.instanceId && 'setInstanceId' in authStrategy) {
-      (authStrategy as any).setInstanceId(options.instanceId);
+    if (options.instanceId && 'setInstanceId' in storageStrategy) {
+      (storageStrategy as any).setInstanceId(options.instanceId);
     }
 
     // Create token manager
-    const refreshIn = options.refreshTime || 30;
-    const backgroundSync = options.backgroundSync || false;
-    const refreshTime = options.refreshTime || 30;
+    const backgroundSyncInterval = options.backgroundSyncInterval;
+    const graceExpiryTimeInSecs = options.graceExpiryTimeInSecs;
 
     this.tokenManager = new TokenManager(
       this.oauthService,
-      this.authStrategy,
-      refreshIn,
-      backgroundSync,
-      refreshTime,
+      this.storageStrategy,
+      backgroundSyncInterval,
+      graceExpiryTimeInSecs,
       this.logger
     );
 
-    // Start background sync if enabled
-    if (backgroundSync) {
+    // Start background sync if interval is provided
+    if (backgroundSyncInterval) {
       this.tokenManager.startBackgroundSync();
     }
 
@@ -150,7 +148,7 @@ export class Connector {
     try {
       this.logger.debug('Exchanging authorization code for tokens');
       const tokenData = await this.oauthService.exchangeCodeForTokens(code, redirectUri);
-      await this.authStrategy.saveToken(tokenData);
+      await this.storageStrategy.saveToken(tokenData);
       this.logger.debug('Tokens obtained and saved');
       return tokenData;
     } catch (error) {
@@ -164,7 +162,7 @@ export class Connector {
    */
   async deleteToken(): Promise<void> {
     try {
-      await this.authStrategy.deleteToken();
+      await this.storageStrategy.deleteToken();
       this.logger.debug('Token deleted');
     } catch (error) {
       this.logger.error(`Failed to delete token: ${error instanceof Error ? error.message : 'Unknown error'}`);

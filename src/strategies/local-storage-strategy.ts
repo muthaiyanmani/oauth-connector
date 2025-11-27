@@ -30,7 +30,7 @@ export class LocalStorageStrategy extends StorageStrategy {
 
       // Write to file
       await fs.writeFile(this.filePath, encrypted, 'utf8');
-      this.logger.debug(`Token saved successfully in the path ${this.filePath}`);
+      this.logger.debug('Token saved successfully');
     } catch (error) {
       this.logger.error(`Failed to save token: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;

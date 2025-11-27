@@ -1,6 +1,6 @@
 import { TokenData } from './types';
 import { OAuthService } from './services/oauth-service';
-import { AuthStrategy } from './strategies/auth-strategy';
+import { StorageStrategy } from './strategies/storage-strategy';
 import { Logger, LogLevel } from './utils/logger';
 
 /**
@@ -8,42 +8,39 @@ import { Logger, LogLevel } from './utils/logger';
  */
 export class TokenManager {
   private oauthService: OAuthService;
-  private authStrategy: AuthStrategy;
+  private storageStrategy: StorageStrategy;
   private logger: Logger;
-  private refreshIn: number; // minutes before expiry
   private backgroundSyncInterval?: NodeJS.Timeout;
-  private backgroundSyncEnabled: boolean;
-  private refreshTime: number; // minutes between background syncs
+  private backgroundSyncIntervalMinutes?: number;
+  private graceExpiryTimeSecs: number; // seconds before expiry to refresh
 
   constructor(
     oauthService: OAuthService,
-    authStrategy: AuthStrategy,
-    refreshIn: number = 30,
-    backgroundSync: boolean = false,
-    refreshTime: number = 30,
+    storageStrategy: StorageStrategy,
+    backgroundSyncInterval?: number, // minutes - if provided, sync is enabled
+    graceExpiryTimeInSecs?: number, // seconds - default 0 (refresh only when expired)
     logger?: Logger
   ) {
     this.oauthService = oauthService;
-    this.authStrategy = authStrategy;
-    this.refreshIn = refreshIn;
-    this.backgroundSyncEnabled = backgroundSync;
-    this.refreshTime = refreshTime;
+    this.storageStrategy = storageStrategy;
+    this.backgroundSyncIntervalMinutes = backgroundSyncInterval;
+    this.graceExpiryTimeSecs = graceExpiryTimeInSecs || 0; // Default to 0 if not provided
     this.logger = logger || new Logger(LogLevel.INFO);
   }
 
   /**
-   * Check if token is expired or about to expire
+   * Check if token is expired or within grace period
    */
-  private isTokenExpiredOrExpiring(tokenData: TokenData): boolean {
+  private isTokenExpired(tokenData: TokenData): boolean {
     if (!tokenData.expiresAt) {
       return true; // No expiry info, consider expired
     }
 
     const now = Date.now();
-    const refreshThreshold = this.refreshIn * 60 * 1000; // Convert minutes to milliseconds
-    const timeUntilExpiry = tokenData.expiresAt - now;
+    const gracePeriodMs = this.graceExpiryTimeSecs * 1000; // Convert seconds to milliseconds
+    const effectiveExpiryTime = tokenData.expiresAt - gracePeriodMs;
 
-    return timeUntilExpiry <= refreshThreshold;
+    return now >= effectiveExpiryTime;
   }
 
   /**
@@ -52,21 +49,24 @@ export class TokenManager {
   async getAccessToken(): Promise<string> {
     try {
       // Load token from storage
-      let tokenData = await this.authStrategy.loadToken();
+      let tokenData = await this.storageStrategy.loadToken();
 
       // If no token or expired, refresh it
-      if (!tokenData || this.isTokenExpiredOrExpiring(tokenData)) {
+      if (!tokenData || this.isTokenExpired(tokenData)) {
         this.logger.debug('Token expired or missing, refreshing...');
 
-        if (!tokenData?.refreshToken) {
+        // Get refresh token from storage or fallback to config
+        const refreshToken = tokenData?.refreshToken || this.oauthService.getRefreshToken();
+
+        if (!refreshToken) {
           throw new Error('No refresh token available. Please re-authenticate.');
         }
 
         // Refresh token
-        tokenData = await this.oauthService.refreshAccessToken(tokenData.refreshToken);
+        tokenData = await this.oauthService.refreshAccessToken(refreshToken);
 
         // Save refreshed token
-        await this.authStrategy.saveToken(tokenData);
+        await this.storageStrategy.saveToken(tokenData);
         this.logger.debug('Token refreshed and saved');
       }
 
@@ -82,15 +82,18 @@ export class TokenManager {
    */
   async refreshToken(): Promise<TokenData> {
     try {
-      const tokenData = await this.authStrategy.loadToken();
+      const tokenData = await this.storageStrategy.loadToken();
 
-      if (!tokenData?.refreshToken) {
+      // Get refresh token from storage or fallback to config
+      const refreshToken = tokenData?.refreshToken || this.oauthService.getRefreshToken();
+
+      if (!refreshToken) {
         throw new Error('No refresh token available. Please re-authenticate.');
       }
 
       this.logger.debug('Manually refreshing token...');
-      const newTokenData = await this.oauthService.refreshAccessToken(tokenData.refreshToken);
-      await this.authStrategy.saveToken(newTokenData);
+      const newTokenData = await this.oauthService.refreshAccessToken(refreshToken);
+      await this.storageStrategy.saveToken(newTokenData);
       this.logger.debug('Token manually refreshed and saved');
 
       return newTokenData;
@@ -109,25 +112,31 @@ export class TokenManager {
       return;
     }
 
-    if (!this.backgroundSyncEnabled) {
-      this.logger.debug('Background sync is disabled');
+    if (!this.backgroundSyncIntervalMinutes) {
+      this.logger.debug('Background sync is not configured');
       return;
     }
 
-    this.logger.debug(`Starting background sync (interval: ${this.refreshTime} minutes)`);
+    this.logger.debug(`Starting background sync (interval: ${this.backgroundSyncIntervalMinutes} minutes)`);
     
-    const intervalMs = this.refreshTime * 60 * 1000;
+    const intervalMs = this.backgroundSyncIntervalMinutes * 60 * 1000;
     this.backgroundSyncInterval = setInterval(async () => {
       try {
         this.logger.debug('Background sync: checking token...');
-        const tokenData = await this.authStrategy.loadToken();
+        const tokenData = await this.storageStrategy.loadToken();
 
-        if (tokenData && this.isTokenExpiredOrExpiring(tokenData)) {
-          this.logger.debug('Background sync: token expiring, refreshing...');
-          if (tokenData.refreshToken) {
-            const newTokenData = await this.oauthService.refreshAccessToken(tokenData.refreshToken);
-            await this.authStrategy.saveToken(newTokenData);
+        if (tokenData && this.isTokenExpired(tokenData)) {
+          this.logger.debug('Background sync: token expired, refreshing...');
+          
+          // Get refresh token from storage or fallback to config
+          const refreshToken = tokenData.refreshToken || this.oauthService.getRefreshToken();
+          
+          if (refreshToken) {
+            const newTokenData = await this.oauthService.refreshAccessToken(refreshToken);
+            await this.storageStrategy.saveToken(newTokenData);
             this.logger.debug('Background sync: token refreshed successfully');
+          } else {
+            this.logger.warn('Background sync: no refresh token available');
           }
         } else {
           this.logger.debug('Background sync: token still valid');
@@ -153,7 +162,7 @@ export class TokenManager {
    * Get current token data
    */
   async getTokenData(): Promise<TokenData | null> {
-    return await this.authStrategy.loadToken();
+    return await this.storageStrategy.loadToken();
   }
 
   /**

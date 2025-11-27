@@ -17,6 +17,13 @@ export abstract class OAuthService {
   }
 
   /**
+   * Get refresh token from config (if available)
+   */
+  getRefreshToken(): string | undefined {
+    return this.config.refreshToken;
+  }
+
+  /**
    * Refresh access token using refresh token
    */
   abstract refreshAccessToken(refreshToken: string): Promise<TokenData>;

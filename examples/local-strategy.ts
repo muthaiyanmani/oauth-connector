@@ -1,12 +1,12 @@
-import { Connector, LocalAuthStrategy, ZohoOAuth } from '../src/index';
+import { Connector, LocalStorageStrategy, ZohoOAuth } from '../src/index';
 import type { ZohoOauthConfig } from '../src/index';
 
 /**
- * Example: Using Local File Strategy with Zoho OAuth
+ * Example: Using Local File Storage Strategy with Zoho OAuth
  */
 async function example() {
   // Configure local file persistence
-  const persistenceConfig = new LocalAuthStrategy({
+  const persistenceConfig = new LocalStorageStrategy({
     filePath: './tokens.json',
     encryptionKey: 'your-encryption-key-here',
   });
@@ -25,8 +25,7 @@ async function example() {
   // Create connector
   const connector = new Connector(serviceConfig, persistenceConfig, {
     debug: true,
-    backgroundSync: true,
-    refreshTime: 30,
+    backgroundSyncInterval: 30, // Check every 30 minutes
   });
 
   // Set up callbacks

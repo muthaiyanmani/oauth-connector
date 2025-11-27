@@ -1,8 +1,8 @@
-import { Connector, RemoteAuthStrategy, ZohoOAuth } from '../src/index';
+import { Connector, RemoteStorageStrategy, ZohoOAuth } from '../src/index';
 import type { TokenData, ZohoOauthConfig } from '../src/index';
 
 /**
- * Example: Using Remote Strategy (S3) with Zoho OAuth
+ * Example: Using Remote Storage Strategy (S3) with Zoho OAuth
  * 
  * Note: This example uses AWS S3, but you can implement
  * any storage backend (Azure Blob, Google Cloud Storage, etc.)
@@ -27,7 +27,7 @@ async function example() {
   const objectKey = 'tokens/zoho-tokens.json';
 
   // Configure remote persistence
-  const persistenceConfig = new RemoteAuthStrategy({
+  const persistenceConfig = new RemoteStorageStrategy({
     onUpload: async (tokenData: TokenData) => {
       // Note: If encryption is enabled, tokenData may contain _encrypted and _data fields
       // The strategy handles encryption/decryption automatically
@@ -61,8 +61,7 @@ async function example() {
   // Create connector with background sync
   const connector = new Connector(serviceConfig, persistenceConfig, {
     instanceId: 'zoho-connector-1',
-    backgroundSync: true,
-    refreshTime: 30, // Check every 30 minutes
+    backgroundSyncInterval: 30, // Check every 30 minutes
     debug: true,
   });
 

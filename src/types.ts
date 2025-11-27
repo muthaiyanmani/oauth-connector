@@ -5,7 +5,6 @@ export interface BaseOAuthConfig {
   clientId: string; // OAuth Client ID
   clientSecret: string; // OAuth Client Secret
   refreshToken?: string; // Initial refresh token (optional)
-  refreshIn?: number; // Minutes before expiry to refresh (default: 30)
 }
 
 /**
@@ -39,26 +38,26 @@ export interface TokenData {
 }
 
 /**
- * Remote authentication strategy configuration
+ * Remote storage strategy configuration
  */
-export interface RemoteAuthConfig {
+export interface RemoteStorageConfig {
   onUpload: (data: TokenData) => Promise<void>;
   onDownload: () => Promise<TokenData | null>;
   encryptionKey?: string;
 }
 
 /**
- * Local authentication strategy configuration
+ * Local storage strategy configuration
  */
-export interface LocalAuthConfig {
+export interface LocalStorageConfig {
   filePath: string;
   encryptionKey?: string;
 }
 
 /**
- * Global authentication strategy configuration
+ * Global storage strategy configuration
  */
-export interface GlobalAuthConfig {
+export interface GlobalStorageConfig {
   encryptionKey?: string;
 }
 
@@ -67,8 +66,8 @@ export interface GlobalAuthConfig {
  */
 export interface ConnectorOptions {
   instanceId?: string;
-  backgroundSync?: boolean;
-  refreshTime?: number; // minutes
+  backgroundSyncInterval?: number; // minutes - if provided, background sync is enabled automatically
+  graceExpiryTimeInSecs?: number; // seconds - refresh token when expiresAt - graceExpiryTimeInSecs is reached
   debug?: boolean;
 }
 

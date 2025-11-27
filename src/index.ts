@@ -1,11 +1,11 @@
 // Main exports
 export { Connector } from './connector';
 
-// Auth Strategies
-export { AuthStrategy } from './strategies/auth-strategy';
-export { LocalAuthStrategy } from './strategies/local-auth-strategy';
-export { RemoteAuthStrategy } from './strategies/remote-auth-strategy';
-export { GlobalAuthStrategy } from './strategies/global-auth-strategy';
+// Storage Strategies
+export { StorageStrategy } from './strategies/storage-strategy';
+export { LocalStorageStrategy } from './strategies/local-storage-strategy';
+export { RemoteStorageStrategy } from './strategies/remote-storage-strategy';
+export { GlobalStorageStrategy } from './strategies/global-storage-strategy';
 
 // OAuth Services
 export { OAuthService } from './services/oauth-service';
@@ -19,9 +19,9 @@ export type {
   ZohoOauthConfig,
   ConnectorConfig,
   TokenData,
-  RemoteAuthConfig,
-  LocalAuthConfig,
-  GlobalAuthConfig,
+  RemoteStorageConfig,
+  LocalStorageConfig,
+  GlobalStorageConfig,
   ConnectorOptions,
   OAuthTokenResponse,
   OnFetchingAccessTokenCallback,

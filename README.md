@@ -9,7 +9,7 @@ A Node.js SDK for OAuth token management with multiple persistence strategies, e
 
 - 🔐 **Multiple Persistence Strategies**: Local file, remote storage (S3, etc.), or in-memory
 - 🔒 **Encryption Support**: AES-256-GCM encryption for token storage
-- 🔄 **Automatic Token Refresh**: Smart token refresh before expiry
+- 🔄 **Automatic Token Refresh**: Automatic token refresh when expired or within grace period
 - ⚙️ **Multiple OAuth Providers**: Zoho, Google, and generic OAuth support
 - 🔁 **Background Sync**: Automatic token refresh in the background
 
@@ -24,10 +24,10 @@ npm install oauth-connector
 ### Local File Strategy with Zoho
 
 ```typescript
-import { Connector, LocalAuthStrategy, ZohoOAuth } from 'oauth-connector';
+import { Connector, LocalStorageStrategy, ZohoOAuth } from 'oauth-connector';
 import type { ZohoOauthConfig } from 'oauth-connector';
 
-const persistenceConfig = new LocalAuthStrategy({
+const persistenceConfig = new LocalStorageStrategy({
   filePath: './tokens.json',
   encryptionKey: 'your-encryption-key',
 });
@@ -43,24 +43,25 @@ const oauthConfig: ZohoOauthConfig = {
 const serviceConfig = new ZohoOAuth(oauthConfig);
 const connector = new Connector(serviceConfig, persistenceConfig, {
   debug: true,
-  backgroundSync: true,
+  backgroundSyncInterval: 30, // Check every 30 minutes
+  graceExpiryTimeInSecs: 300, // Refresh token 5 minutes (300 seconds) before it expires
 });
 
-// Get access token (auto-refreshes if expired)
+// Get access token (auto-refreshes if expired or within grace period)
 const token = await connector.getAccessToken();
 ```
 
 ### Remote Strategy (S3)
 
 ```typescript
-import { Connector, RemoteAuthStrategy, ZohoOAuth } from 'oauth-connector';
+import { Connector, RemoteStorageStrategy, ZohoOAuth } from 'oauth-connector';
 import type { ZohoOauthConfig, TokenData } from 'oauth-connector';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const s3Client = new S3Client({ region: 'us-east-1' });
 const bucketName = 'my-token-bucket';
 
-const persistenceConfig = new RemoteAuthStrategy({
+const persistenceConfig = new RemoteStorageStrategy({
   onUpload: async (tokenData: TokenData) => {
     await s3Client.send(new PutObjectCommand({
       Bucket: bucketName,
@@ -89,18 +90,17 @@ const oauthConfig: ZohoOauthConfig = {
 
 const serviceConfig = new ZohoOAuth(oauthConfig);
 const connector = new Connector(serviceConfig, persistenceConfig, {
-  backgroundSync: true,
-  refreshTime: 30,
+  backgroundSyncInterval: 30, // Check every 30 minutes
 });
 ```
 
 ### Global Variable Strategy
 
 ```typescript
-import { Connector, GlobalAuthStrategy, OAuth } from 'oauth-connector';
+import { Connector, GlobalStorageStrategy, OAuth } from 'oauth-connector';
 import type { ConnectorConfig } from 'oauth-connector';
 
-const persistenceConfig = new GlobalAuthStrategy({
+const persistenceConfig = new GlobalStorageStrategy({
   encryptionKey: 'your-encryption-key',
 });
 
@@ -128,7 +128,7 @@ Main class that orchestrates OAuth service and persistence strategy.
 ```typescript
 new Connector(
   oauthService: OAuthService,
-  authStrategy: AuthStrategy,
+  storageStrategy: StorageStrategy,
   options?: ConnectorOptions
 )
 ```
@@ -137,10 +137,10 @@ new Connector(
 
 ```typescript
 interface ConnectorOptions {
-  instanceId?: string;        // Unique ID for multi-instance support
-  backgroundSync?: boolean;    // Enable background token sync
-  refreshTime?: number;        // Minutes between background syncs
-  debug?: boolean;             // Enable debug logging
+  instanceId?: string;              // Unique ID for multi-instance support
+  backgroundSyncInterval?: number;  // Minutes between background syncs (if provided, sync is enabled)
+  graceExpiryTimeInSecs?: number;   // Seconds - refresh token when expiresAt - graceExpiryTimeInSecs is reached (default: 0)
+  debug?: boolean;                  // Enable debug logging
 }
 ```
 
@@ -164,37 +164,37 @@ connector.onTokenError = (error: Error) => {
 };
 ```
 
-### Auth Strategies
+### Storage Strategies
 
-#### LocalAuthStrategy
+#### LocalStorageStrategy
 
 Persists tokens to a local file.
 
 ```typescript
-new LocalAuthStrategy({
+new LocalStorageStrategy({
   filePath: './tokens.json',
   encryptionKey?: string,
 })
 ```
 
-#### RemoteAuthStrategy
+#### RemoteStorageStrategy
 
 Persists tokens using custom upload/download callbacks.
 
 ```typescript
-new RemoteAuthStrategy({
+new RemoteStorageStrategy({
   onUpload: (tokenData: TokenData) => Promise<void>,
   onDownload: () => Promise<TokenData | null>,
   encryptionKey?: string,
 })
 ```
 
-#### GlobalAuthStrategy
+#### GlobalStorageStrategy
 
 Persists tokens in memory (global variable).
 
 ```typescript
-new GlobalAuthStrategy({
+new GlobalStorageStrategy({
   encryptionKey?: string,
 })
 ```
@@ -225,7 +225,6 @@ new GoogleOAuth({
   authUrl: string,
   refreshUrl: string,
   refreshToken?: string,
-  refreshIn?: number,
 })
 ```
 
@@ -240,7 +239,6 @@ new OAuth({
   authUrl: string,
   refreshUrl: string,
   refreshToken?: string,
-  refreshIn?: number,
 })
 ```
 

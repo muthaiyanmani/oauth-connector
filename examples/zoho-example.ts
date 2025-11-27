@@ -1,4 +1,4 @@
-import { Connector, LocalAuthStrategy, ZohoOAuth } from '../src/index';
+import { Connector, LocalStorageStrategy, ZohoOAuth } from '../src/index';
 import type { ZohoOauthConfig } from '../src/index';
 
 /**
@@ -6,7 +6,7 @@ import type { ZohoOauthConfig } from '../src/index';
  */
 async function zohoExample() {
   // Step 1: Configure persistence
-  const persistenceConfig = new LocalAuthStrategy({
+  const persistenceConfig = new LocalStorageStrategy({
     filePath: './zoho-tokens.json',
     encryptionKey: process.env.ENCRYPTION_KEY || 'default-encryption-key',
   });
@@ -15,10 +15,10 @@ async function zohoExample() {
   // Note: URLs are built automatically from accountsDomain
   // Supported domains: accounts.zoho.com, accounts.zoho.eu, accounts.zoho.in, etc.
   const oauthConfig: ZohoOauthConfig = {
-    clientId: process.env.ZOHO_CLIENT_ID || 'your-client-id',
-    clientSecret: process.env.ZOHO_CLIENT_SECRET || 'your-client-secret',
+    clientId:'your-client-id',
+    clientSecret:'your-client-secret',
     accountsDomain: 'accounts.zoho.com', // or 'accounts.zoho.eu', 'accounts.zoho.in', etc.
-    refreshToken: process.env.ZOHO_REFRESH_TOKEN, // Optional, for initial setup
+    refreshToken: 'your-refresh-token'
   };
 
   const serviceConfig = new ZohoOAuth(oauthConfig);
@@ -26,8 +26,7 @@ async function zohoExample() {
   // Step 3: Create connector
   const connector = new Connector(serviceConfig, persistenceConfig, {
     instanceId: 'zoho-main',
-    backgroundSync: true,
-    refreshTime: 30,
+    backgroundSyncInterval: 30, // Check every 30 minutes
     debug: process.env.NODE_ENV === 'development',
   });
 

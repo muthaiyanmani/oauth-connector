@@ -1,11 +1,11 @@
-import { Connector, GlobalAuthStrategy, OAuth } from '../src/index';
+import { Connector, GlobalStorageStrategy, OAuth } from '../src/index';
 
 /**
- * Example: Using Global Variable Strategy with Generic OAuth
+ * Example: Using Global Variable Storage Strategy with Generic OAuth
  */
 async function example() {
   // Configure global variable persistence
-  const persistenceConfig = new GlobalAuthStrategy({
+  const persistenceConfig = new GlobalStorageStrategy({
     encryptionKey: 'your-encryption-key-here',
   });
 
@@ -16,7 +16,6 @@ async function example() {
     authUrl: 'https://oauth.example.com/authorize',
     refreshUrl: 'https://oauth.example.com/token',
     refreshToken: 'initial-refresh-token',
-    refreshIn: 30,
   };
 
   const serviceConfig = new OAuth(oauthConfig);
