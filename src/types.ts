@@ -1,3 +1,4 @@
+import { IncomingMessage } from "http";
 /**
  * Base OAuth configuration (shared fields)
  */
@@ -51,6 +52,22 @@ export interface RemoteStorageConfig {
  */
 export interface LocalStorageConfig {
   filePath: string;
+  encryptionKey?: string;
+}
+
+/**
+ * Extended IncomingMessage with Catalyst-specific headers
+ */
+export interface CatalystIncomingMessage extends IncomingMessage {
+  catalystHeaders?: Record<string, string | string[] | undefined>;
+}
+
+/**
+ * Catalyst Cache storage strategy configuration
+ */
+export interface CatalystCacheStorageConfig {
+  httpReq: CatalystIncomingMessage; // Node.js HTTP request object with Catalyst headers
+  key: string; // Cache key for storing the token
   encryptionKey?: string;
 }
 

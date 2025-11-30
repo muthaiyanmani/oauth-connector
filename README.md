@@ -110,6 +110,38 @@ const serviceConfig = new ZohoOAuth(oauthConfig);
 const connector = new Connector(serviceConfig, storageConfig, {});
 ```
 
+### Catalyst Cache Strategy
+> Note: This will work only on Catalyst Function/Appsail.
+```typescript
+import { Connector, CatalystCacheStorageStrategy, ZohoOAuth } from 'oauth-connector';
+import type { ZohoOauthConfig } from 'oauth-connector';
+import { IncomingMessage } from 'http';
+import express from 'express';
+
+const app = express();
+
+app.post('/api/oauth', async (req: express.Request, res: express.Response) => {
+  const storageConfig = new CatalystCacheStorageStrategy({
+    httpReq: req as IncomingMessage,
+    key: 'oauth-token',
+    encryptionKey: 'your-encryption-key', // Optional
+  });
+
+  const oauthConfig: ZohoOauthConfig = {
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    accountsDomain: 'accounts.zoho.com',
+    refreshToken: 'initial-refresh-token',
+  };
+
+  const serviceConfig = new ZohoOAuth(oauthConfig);
+  const connector = new Connector(serviceConfig, storageConfig);
+
+  const token = await connector.getAccessToken();
+  res.json({ token });
+});
+```
+
 ## API Reference
 
 ### Connector
@@ -191,10 +223,6 @@ npm run lint:fix
 ```bash
 npm run format
 ```
-
-## Requirements
-
-- Node.js >= 14.0.0 (uses native `https`/`http` modules, no external dependencies)
 
 ## License
 
