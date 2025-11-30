@@ -39,8 +39,12 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
   }
 
   private getReqHeaders(): Record<string, string> {
-    const oauthToken = this.httpReq?.headers['x-zc-user-cred-token'] || this.httpReq?.catalystHeaders?.['x-zc-user-cred-token'];
-    const projectKey = this.httpReq?.headers['x-zc-project-key'] || this.httpReq?.catalystHeaders?.['x-zc-project-key'];
+    const oauthToken =
+      this.httpReq?.headers['x-zc-user-cred-token'] ||
+      this.httpReq?.catalystHeaders?.['x-zc-user-cred-token'];
+    const projectKey =
+      this.httpReq?.headers['x-zc-project-key'] ||
+      this.httpReq?.catalystHeaders?.['x-zc-project-key'];
     return {
       Authorization: `Bearer ${oauthToken}`,
       PROJECT_ID: projectKey as string,
@@ -93,7 +97,7 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
    * Save token to Catalyst cache
    */
   async saveToken(tokenData: TokenData): Promise<void> {
-    if(!this.httpReq) {
+    if (!this.httpReq) {
       this.logger.warn('HTTP request object is null and strategy is not supported');
       return;
     }
@@ -118,8 +122,7 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
    * Load token from Catalyst cache
    */
   async loadToken(): Promise<TokenData | null> {
-
-    if(!this.httpReq) {
+    if (!this.httpReq) {
       this.logger.warn('HTTP request object is null and strategy is not supported');
       return null;
     }
@@ -154,8 +157,7 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
    * Delete token from Catalyst cache
    */
   async deleteToken(): Promise<void> {
-
-    if(!this.httpReq) {
+    if (!this.httpReq) {
       this.logger.warn('HTTP request object is null and strategy is not supported');
       return;
     }
