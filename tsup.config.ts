@@ -14,5 +14,5 @@ export default defineConfig({
     };
   },
   treeshake: true,
-  minify: false,
+  minify: true,
 });

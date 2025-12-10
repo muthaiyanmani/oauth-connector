@@ -1,6 +1,6 @@
 {
   "name": "oauth-connector",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "OAuth Connector SDK for automatic token management and refresh with multiple persistence strategies",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
