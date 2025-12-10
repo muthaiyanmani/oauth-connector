@@ -9,6 +9,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to push commits and tags
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -16,6 +18,7 @@ jobs:
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true  # Explicitly persist credentials for git push
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
