@@ -38,18 +38,18 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
     const hasApiDomain = !!process.env.X_ZOHO_CATALYST_CONSOLE_URL;
     const hasProjectId = !!process.env.CATALYST_PROJECT_ID;
     const hasHttpReq = !!this.httpReq;
-    
+
     return hasApiDomain && hasProjectId && hasHttpReq;
   }
 
   private getApiUrl(): string | null {
     const apiDomain = process.env.X_ZOHO_CATALYST_CONSOLE_URL;
     const projectId = process.env.CATALYST_PROJECT_ID;
-    
+
     if (!apiDomain || !projectId) {
       return null;
     }
-    
+
     const apiPath = `/baas/v1/project/${projectId}/segment/Default/cache`;
     return apiDomain + apiPath;
   }
@@ -58,18 +58,18 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
     if (!this.httpReq) {
       return null;
     }
-    
+
     const oauthToken =
       this.httpReq.headers['x-zc-user-cred-token'] ||
       this.httpReq.catalystHeaders?.['x-zc-user-cred-token'];
     const projectKey =
       this.httpReq.headers['x-zc-project-key'] ||
       this.httpReq.catalystHeaders?.['x-zc-project-key'];
-    
+
     if (!oauthToken || !projectKey) {
       return null;
     }
-    
+
     return {
       Authorization: `Bearer ${oauthToken}`,
       PROJECT_ID: projectKey as string,
@@ -84,7 +84,7 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
 
     const apiUrl = this.getApiUrl();
     const reqHeaders = this.getReqHeaders();
-    
+
     if (!reqHeaders) {
       this.logger.debug('Missing Catalyst request headers, skipping cache get');
       return null;
@@ -114,7 +114,7 @@ export class CatalystCacheStorageStrategy extends StorageStrategy {
 
     const apiUrl = this.getApiUrl();
     const reqHeaders = this.getReqHeaders();
-    
+
     if (!reqHeaders) {
       this.logger.debug('Missing Catalyst request headers, skipping cache set');
       return;

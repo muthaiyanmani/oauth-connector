@@ -38,7 +38,7 @@ export class Connector {
 
     // Set instance ID for storage strategy if applicable (only if storageStrategy exists)
     if (options.instanceId && storageStrategy && 'setInstanceId' in storageStrategy) {
-      (storageStrategy as any).setInstanceId(options.instanceId);
+      (storageStrategy as StorageStrategy & { setInstanceId: (id: string) => void }).setInstanceId(options.instanceId);
     }
 
     // Create token manager
